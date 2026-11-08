@@ -1,0 +1,220 @@
+@import 'tailwindcss';
+
+/* Paleta base (antes do sorteio) — redefinida por gênero via variáveis CSS. */
+:root {
+  --fundo1: #0f0b1e;
+  --fundo2: #2a1c4f;
+  --primaria: #f2c46d;
+  --secundaria: #c79bff;
+  --texto: #f6efe3;
+  --texto-suave: #cfc4b3;
+  --papel: rgba(18, 14, 30, 0.72);
+  --borda: rgba(255, 240, 210, 0.14);
+  color-scheme: dark;
+}
+
+@theme inline {
+  --color-primaria: var(--primaria);
+  --color-secundaria: var(--secundaria);
+  --color-texto: var(--texto);
+  --color-suave: var(--texto-suave);
+  --color-papel: var(--papel);
+  --color-borda: var(--borda);
+  --font-titulo: 'Fraunces', Georgia, serif;
+  --font-leitura: 'Literata', Georgia, serif;
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--fundo1);
+  color: var(--texto);
+  font-family: var(--font-leitura);
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+button {
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--primaria) 40%, transparent);
+}
+
+/* Capitular na primeira letra do capítulo. */
+.capitular > p:first-child::first-letter {
+  float: left;
+  font-family: var(--font-titulo);
+  font-weight: 800;
+  font-size: 3.4em;
+  line-height: 0.82;
+  padding: 0.08em 0.1em 0 0;
+  color: var(--primaria);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--primaria) 45%, transparent);
+}
+
+.cursor-escrita::after {
+  content: '';
+  display: inline-block;
+  width: 0.08em;
+  height: 1.05em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--primaria);
+  animation: piscar 0.9s steps(1) infinite;
+}
+@keyframes piscar {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Grão de papel bem leve por cima de tudo (imagem estática, custo zero por quadro). */
+.grao {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ---------------- Ambientes animados (apenas transform/opacity) ---------------- */
+.particula {
+  position: absolute;
+  will-change: transform, opacity;
+  border-radius: 9999px;
+}
+
+.amb-vagalumes .particula {
+  width: 6px;
+  height: 6px;
+  background: radial-gradient(circle, #fff6b0 0%, #f2c46d 40%, transparent 70%);
+  animation: vagalume var(--dur) ease-in-out var(--atraso) infinite alternate;
+}
+@keyframes vagalume {
+  0% {
+    transform: translate(0, 0) scale(0.6);
+    opacity: 0;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--dx), var(--dy)) scale(1.2);
+    opacity: 0.2;
+  }
+}
+
+.amb-estrelas .particula {
+  width: 2px;
+  height: 2px;
+  background: #e6f6ff;
+  box-shadow: 0 0 6px #9fe8ff;
+  animation: estrela var(--dur) linear var(--atraso) infinite;
+}
+@keyframes estrela {
+  0% {
+    transform: translate3d(0, -10vh, 0) scale(0.6);
+    opacity: 0;
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx), 110vh, 0) scale(1.3);
+    opacity: 0;
+  }
+}
+
+.amb-chuva .particula {
+  width: 1.5px;
+  height: 46px;
+  border-radius: 2px;
+  background: linear-gradient(to bottom, transparent, rgba(200, 215, 255, 0.55));
+  animation: chuva var(--dur-curta) linear var(--atraso) infinite;
+}
+@keyframes chuva {
+  0% {
+    transform: translate3d(0, -15vh, 0) rotate(12deg);
+  }
+  100% {
+    transform: translate3d(-12vh, 115vh, 0) rotate(12deg);
+  }
+}
+
+.amb-nevoa .particula {
+  width: 70vw;
+  height: 40vw;
+  background: radial-gradient(ellipse at center, rgba(220, 200, 200, 0.12), transparent 65%);
+  animation: nevoa var(--dur-longa) ease-in-out var(--atraso) infinite alternate;
+}
+@keyframes nevoa {
+  0% {
+    transform: translate3d(-20vw, 0, 0) scale(1);
+    opacity: 0.3;
+  }
+  100% {
+    transform: translate3d(30vw, -6vh, 0) scale(1.4);
+    opacity: 0.9;
+  }
+}
+
+.amb-ondas .particula {
+  width: 140vw;
+  height: 26vh;
+  left: -20vw !important;
+  border-radius: 45%;
+  background: radial-gradient(ellipse at top, rgba(95, 211, 196, 0.16), transparent 70%);
+  animation: onda var(--dur-longa) ease-in-out var(--atraso) infinite alternate;
+}
+@keyframes onda {
+  0% {
+    transform: translate3d(-6vw, 0, 0) rotate(-2deg);
+  }
+  100% {
+    transform: translate3d(6vw, -3vh, 0) rotate(2deg);
+  }
+}
+
+.amb-brasas .particula {
+  width: 4px;
+  height: 4px;
+  background: radial-gradient(circle, #ffe2a8 0%, #ff8a3d 50%, transparent 75%);
+  animation: brasa var(--dur) ease-out var(--atraso) infinite;
+}
+@keyframes brasa {
+  0% {
+    transform: translate3d(0, 10vh, 0) scale(1);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate3d(var(--dx), -100vh, 0) scale(0.3);
+    opacity: 0;
+  }
+}
+
+.amb-padrao .particula {
+  width: 3px;
+  height: 3px;
+  background: radial-gradient(circle, #fff 0%, var(--primaria) 50%, transparent 75%);
+  animation: vagalume var(--dur) ease-in-out var(--atraso) infinite alternate;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .particula {
+    animation: none !important;
+    opacity: 0.4;
+  }
+}
