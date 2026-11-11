@@ -103,7 +103,7 @@ export function Partida({ sessao, cps, rapido }: { sessao: Sessao; cps: number; 
 
   const mostrarRoleta =
     e.fase === 'jogando' &&
-    !!e.genero &&
+    (!!e.genero || !!e.temaLivre) &&
     roletaVista !== e.idPartida &&
     (e.capitulos.length === 0 || (e.capitulos.length === 1 && !e.capitulos[0].escolhas[sessao.meuId]));
 
@@ -115,7 +115,13 @@ export function Partida({ sessao, cps, rapido }: { sessao: Sessao; cps: number; 
     <TelaBase>
       <div className="mb-4 flex items-center justify-between gap-2">
         <p className="min-w-0 truncate font-titulo text-sm text-suave">
-          {e.fase !== 'lobby' && genero ? `${GENEROS[genero].icone} ${e.tituloHistoria || GENEROS[genero].nome}` : 'Livro-Jogo a Dois'}
+          {e.fase === 'lobby'
+            ? 'Livro-Jogo a Dois'
+            : e.temaLivre
+              ? `✍️ ${e.tituloHistoria || e.temaLivre}`
+              : genero
+                ? `${GENEROS[genero].icone} ${e.tituloHistoria || GENEROS[genero].nome}`
+                : 'Livro-Jogo a Dois'}
         </p>
         <div className="flex shrink-0 items-center gap-2">
           {(statusRuim || parceiroCaiu) && (
@@ -167,7 +173,17 @@ export function Partida({ sessao, cps, rapido }: { sessao: Sessao; cps: number; 
       </AnimatePresence>
 
       <AnimatePresence>
-        {mostrarRoleta && e.genero && <Roleta key="roleta" genero={e.genero} semente={e.semente} rapido={rapido} aoTerminar={fecharRoleta} />}
+        {mostrarRoleta && (
+          <Roleta
+            key="roleta"
+            genero={e.genero}
+            temaLivre={e.temaLivre}
+            origem={e.origemTema ?? 'sorteio'}
+            semente={e.semente}
+            rapido={rapido}
+            aoTerminar={fecharRoleta}
+          />
+        )}
         {livroAberto && <LivroCompleto key="livro" estado={e} aoFechar={() => setLivroAberto(false)} />}
       </AnimatePresence>
     </TelaBase>

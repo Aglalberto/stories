@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { lerParametros } from '../jogo/config';
-import type { Escolha, EstadoJogo } from '../jogo/tipos';
+import type { Escolha, EstadoJogo, SugestaoTema } from '../jogo/tipos';
 import type { MsgAnfitriao } from '../rede/protocolo';
 import { criarConvidadoLocal, criarConvidadoPeer, type LadoConvidado, type StatusRede } from '../rede/transporte';
 import { armazenamento } from './armazenamento';
@@ -61,10 +61,16 @@ export function useConvidado(op: OpcoesConvidado): Sessao {
     });
   }, []);
 
+  const sugerir = useCallback((s: SugestaoTema | null) => {
+    rede.current?.enviar({ t: 'sugestao', sugestao: s });
+    // Atualização otimista, confirmada pelo próximo estado do anfitrião.
+    setEstado((e) => (e && e.fase === 'lobby' ? { ...e, sugestoes: { ...e.sugestoes, j2: s } } : e));
+  }, []);
+
   const sair = useCallback(() => {
     armazenamento.salvarConvidado(null);
     op.aoSair();
   }, [op]);
 
-  return { papel: 'convidado', meuId: 'j2', estado, status, demo: false, escolher, sair };
+  return { papel: 'convidado', meuId: 'j2', estado, status, demo: false, escolher, sugerir, sair };
 }

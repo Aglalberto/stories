@@ -1,4 +1,5 @@
-import type { GeneroId, Semente } from './tipos';
+import { MAX_TEMA_LIVRE } from './config';
+import type { GeneroId, OrigemTema, Semente, SugestaoTema } from './tipos';
 
 export type Ambiente = 'vagalumes' | 'estrelas' | 'chuva' | 'nevoa' | 'ondas' | 'brasas';
 
@@ -216,6 +217,15 @@ function escolher<T>(lista: readonly T[], rnd: Aleatorio): T {
   return lista[Math.floor(rnd() * lista.length) % lista.length];
 }
 
+export function sortearSemente(genero: GeneroId, rnd: Aleatorio = aleatorioSeguro): Semente {
+  const g = GENEROS[genero];
+  return {
+    lugar: escolher(g.lugares, rnd),
+    elemento: escolher(g.elementos, rnd),
+    objetivo: escolher(g.objetivos, rnd),
+  };
+}
+
 /** Sorteia um gênero (evitando repetir o anterior) e uma semente de história. */
 export function sortearGenero(
   anterior: GeneroId | null,
@@ -223,14 +233,55 @@ export function sortearGenero(
 ): { genero: GeneroId; semente: Semente } {
   const candidatos = LISTA_GENEROS.filter((g) => g.id !== anterior);
   const g = escolher(candidatos, rnd);
-  return {
-    genero: g.id,
-    semente: {
-      lugar: escolher(g.lugares, rnd),
-      elemento: escolher(g.elementos, rnd),
-      objetivo: escolher(g.objetivos, rnd),
-    },
-  };
+  return { genero: g.id, semente: sortearSemente(g.id, rnd) };
+}
+
+/** Tema já resolvido, pronto para começar a partida. */
+export interface TemaDefinido {
+  genero: GeneroId | null;
+  temaLivre: string | null;
+  semente: Semente | null;
+  origem: OrigemTema;
+}
+
+export function limparTemaLivre(texto: string): string {
+  return texto.replace(/\s+/g, ' ').trim().slice(0, MAX_TEMA_LIVRE);
+}
+
+/** Valida uma sugestão vinda da rede; devolve null se for inválida. */
+export function validarSugestao(s: unknown): SugestaoTema | null {
+  if (!s || typeof s !== 'object') return null;
+  const o = s as { tipo?: unknown; genero?: unknown; texto?: unknown };
+  if (o.tipo === 'sortear') return { tipo: 'sortear' };
+  if (o.tipo === 'genero' && typeof o.genero === 'string' && Object.hasOwn(GENEROS, o.genero)) return { tipo: 'genero', genero: o.genero as GeneroId };
+  if (o.tipo === 'livre' && typeof o.texto === 'string') {
+    const texto = limparTemaLivre(o.texto);
+    return texto ? { tipo: 'livre', texto } : null;
+  }
+  return null;
+}
+
+export function mesmaSugestao(a: SugestaoTema | null, b: SugestaoTema | null): boolean {
+  const x = a ?? { tipo: 'sortear' };
+  const y = b ?? { tipo: 'sortear' };
+  if (x.tipo !== y.tipo) return false;
+  if (x.tipo === 'genero' && y.tipo === 'genero') return x.genero === y.genero;
+  if (x.tipo === 'livre' && y.tipo === 'livre') return x.texto.toLowerCase() === y.texto.toLowerCase();
+  return true;
+}
+
+export function rotuloSugestao(s: SugestaoTema | null): string {
+  if (!s || s.tipo === 'sortear') return '🎲 Surpresa';
+  if (s.tipo === 'genero') return `${GENEROS[s.genero].icone} ${GENEROS[s.genero].nome}`;
+  return `✍️ “${s.texto}”`;
+}
+
+/** Transforma uma sugestão (ou nenhuma) no tema da partida. */
+export function resolverTema(s: SugestaoTema | null, anterior: GeneroId | null, rnd: Aleatorio = aleatorioSeguro): TemaDefinido {
+  if (s?.tipo === 'genero') return { genero: s.genero, temaLivre: null, semente: sortearSemente(s.genero, rnd), origem: 'escolha' };
+  if (s?.tipo === 'livre' && limparTemaLivre(s.texto)) return { genero: null, temaLivre: limparTemaLivre(s.texto), semente: null, origem: 'livre' };
+  const { genero, semente } = sortearGenero(anterior, rnd);
+  return { genero, temaLivre: null, semente, origem: 'sorteio' };
 }
 
 const ALFABETO_CODIGO = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';

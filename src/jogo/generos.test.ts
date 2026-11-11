@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gerarCodigoSala, LISTA_GENEROS, normalizarCodigo, sortearGenero } from './generos';
+import { gerarCodigoSala, LISTA_GENEROS, mesmaSugestao, normalizarCodigo, resolverTema, rotuloSugestao, sortearGenero, validarSugestao } from './generos';
 
 describe('sorteio', () => {
   it('nunca repete o gênero anterior', () => {
@@ -29,5 +29,39 @@ describe('código da sala', () => {
   });
   it('normaliza o que a pessoa digita', () => {
     expect(normalizarCodigo(' k7q-f2 ')).toBe('K7QF2');
+  });
+});
+
+describe('tema escolhido', () => {
+  it('resolve gênero escolhido com semente do próprio gênero', () => {
+    const t = resolverTema({ tipo: 'genero', genero: 'terror' }, null);
+    expect(t.genero).toBe('terror');
+    expect(t.origem).toBe('escolha');
+    expect(LISTA_GENEROS.find((g) => g.id === 'terror')!.lugares).toContain(t.semente!.lugar);
+  });
+  it('resolve tema livre sem gênero nem semente', () => {
+    expect(resolverTema({ tipo: 'livre', texto: '  Espiões   em Paris ' }, null)).toEqual({ genero: null, temaLivre: 'Espiões em Paris', semente: null, origem: 'livre' });
+  });
+  it('sem sugestão (ou surpresa) sorteia evitando o anterior', () => {
+    for (let i = 0; i < 50; i++) {
+      const t = resolverTema(null, 'noir');
+      expect(t.origem).toBe('sorteio');
+      expect(t.genero).not.toBe('noir');
+    }
+    expect(resolverTema({ tipo: 'sortear' }, null).origem).toBe('sorteio');
+  });
+  it('valida sugestões vindas da rede', () => {
+    expect(validarSugestao({ tipo: 'genero', genero: 'scifi' })).toEqual({ tipo: 'genero', genero: 'scifi' });
+    expect(validarSugestao({ tipo: 'genero', genero: 'toString' })).toBeNull();
+    expect(validarSugestao({ tipo: 'livre', texto: '   ' })).toBeNull();
+    expect(validarSugestao({ tipo: 'livre', texto: 'x'.repeat(500) })).toEqual({ tipo: 'livre', texto: 'x'.repeat(120) });
+    expect(validarSugestao('lixo')).toBeNull();
+  });
+  it('compara sugestões e gera rótulos', () => {
+    expect(mesmaSugestao(null, { tipo: 'sortear' })).toBe(true);
+    expect(mesmaSugestao({ tipo: 'livre', texto: 'Paris' }, { tipo: 'livre', texto: 'paris' })).toBe(true);
+    expect(mesmaSugestao({ tipo: 'genero', genero: 'noir' }, { tipo: 'genero', genero: 'terror' })).toBe(false);
+    expect(rotuloSugestao({ tipo: 'genero', genero: 'piratas' })).toBe('🏴‍☠️ Aventura Pirata');
+    expect(rotuloSugestao(null)).toBe('🎲 Surpresa');
   });
 });

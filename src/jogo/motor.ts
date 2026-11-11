@@ -4,15 +4,15 @@ import type {
   Efeitos,
   Escolha,
   EstadoJogo,
-  GeneroId,
   IdJogador,
   Medidores,
   RespostaCapitulo,
-  Semente,
+  SugestaoTema,
   TextoParcial,
   TipoFinal,
 } from './tipos';
 import { JOGADORES } from './tipos';
+import { limparTemaLivre, validarSugestao, type TemaDefinido } from './generos';
 
 export function criarEstadoInicial(codigo: string, nomeAnfitriao: string): EstadoJogo {
   return {
@@ -22,6 +22,9 @@ export function criarEstadoInicial(codigo: string, nomeAnfitriao: string): Estad
     fase: 'lobby',
     jogadores: { j1: { nome: nomeAnfitriao, conectado: true }, j2: null },
     genero: null,
+    temaLivre: null,
+    origemTema: null,
+    sugestoes: { j1: null, j2: null },
     semente: null,
     tituloHistoria: '',
     personagens: null,
@@ -116,7 +119,8 @@ export function validarEscolha(e: EstadoJogo, numero: number, escolha: Escolha):
 export type Acao =
   | { tipo: 'convidadoEntrou'; nome: string }
   | { tipo: 'conexao'; jogador: IdJogador; conectado: boolean }
-  | { tipo: 'sortear'; genero: GeneroId; semente: Semente; idPartida: number }
+  | { tipo: 'sugerir'; jogador: IdJogador; sugestao: SugestaoTema | null }
+  | { tipo: 'iniciar'; tema: TemaDefinido; idPartida: number }
   | { tipo: 'geracaoIniciada' }
   | { tipo: 'parcial'; parcial: TextoParcial }
   | { tipo: 'capituloGerado'; resposta: RespostaCapitulo }
@@ -136,14 +140,23 @@ export function motor(e: EstadoJogo, a: Acao): EstadoJogo {
       if (!j || j.conectado === a.conectado) return e;
       return { ...e, jogadores: { ...e.jogadores, [a.jogador]: { ...j, conectado: a.conectado } } };
     }
-    case 'sortear': {
+    case 'sugerir': {
+      if (e.fase !== 'lobby') return e;
+      const sugestao = a.sugestao ? validarSugestao(a.sugestao) : null;
+      return { ...e, sugestoes: { ...e.sugestoes, [a.jogador]: sugestao } };
+    }
+    case 'iniciar': {
       if (e.fase !== 'lobby' || !e.jogadores.j2) return e;
+      const t = a.tema;
+      const temaLivre = t.temaLivre ? limparTemaLivre(t.temaLivre) : null;
       return {
         ...e,
         fase: 'jogando',
         idPartida: a.idPartida,
-        genero: a.genero,
-        semente: a.semente,
+        genero: temaLivre ? null : t.genero,
+        temaLivre,
+        origemTema: temaLivre ? 'livre' : t.origem,
+        semente: temaLivre ? null : t.semente,
         capitulos: [],
         medidores: clonarMedidores(MEDIDORES_INICIAIS),
         erro: null,
@@ -175,6 +188,8 @@ export function motor(e: EstadoJogo, a: Acao): EstadoJogo {
         capitulos: [...e.capitulos, cap],
         medidores,
         tituloHistoria: e.tituloHistoria || r.tituloHistoria || '',
+        // No tema livre, o clima visual só é conhecido depois do capítulo 1.
+        genero: e.genero ?? r.visual ?? 'fantasia',
         personagens: e.personagens ?? r.personagens,
         gerando: false,
         parcial: null,

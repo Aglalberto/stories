@@ -1,5 +1,7 @@
+import { GENEROS } from '../jogo/generos';
 import type {
   Efeitos,
+  GeneroId,
   EstiloOpcao,
   IdJogador,
   Opcao,
@@ -143,5 +145,6 @@ export function interpretarResposta(texto: string, ctx: ContextoResposta): Respo
           }
         : null,
     final: ctx.epilogo ? final : null,
+    visual: ctx.numero === 1 && typeof dados.visual === 'string' && Object.hasOwn(GENEROS, dados.visual) ? (dados.visual as GeneroId) : null,
   };
 }

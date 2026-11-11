@@ -9,9 +9,8 @@ function partida(): EstadoJogo {
   let e = criarEstadoInicial('ABCDE', 'Ana');
   e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
   return motor(e, {
-    tipo: 'sortear',
-    genero: 'piratas',
-    semente: { lugar: 'uma taverna', elemento: 'uma bússola', objetivo: 'achar o tesouro' },
+    tipo: 'iniciar',
+    tema: { genero: 'piratas', temaLivre: null, semente: { lugar: 'uma taverna', elemento: 'uma bússola', objetivo: 'achar o tesouro' }, origem: 'sorteio' },
     idPartida: 1,
   });
 }
@@ -31,12 +30,35 @@ describe('prompt', () => {
     expect(p.mensagem).toContain('J2 se chama Beto');
   });
 
+  it('usa o tema livre no lugar do gênero e da semente', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, { tipo: 'iniciar', tema: { genero: null, temaLivre: 'Um "casamento" de bruxas', semente: null, origem: 'livre' }, idPartida: 1 });
+    const p = montarPedido(e);
+    expect(p.mensagem).toContain(`Tema livre escolhido pelo casal: "Um 'casamento' de bruxas".`);
+    expect(p.mensagem).not.toContain('Gênero:');
+    expect(p.mensagem).not.toContain('Cenário inicial');
+  });
+
+  it('o narrador simulado aceita tema livre e informa o visual', async () => {
+    const g = criarGeradorSimulado({ atrasoMs: 0 });
+    const nomes = { j1: 'Ana', j2: 'Beto' };
+    const texto = await g.gerar(
+      { historico: [], mensagem: '', contexto: { numero: 1, epilogo: false, genero: null, temaLivre: 'Bruxas', nomes, totalCapitulos: 7 } },
+      () => undefined,
+      new AbortController().signal,
+    );
+    const r = interpretarResposta(texto, { numero: 1, epilogo: false, nomes });
+    expect(r.narracao).toContain('“Bruxas”');
+    expect(r.visual).toBe('fantasia');
+  });
+
   it('inclui as escolhas anteriores e os medidores', () => {
     let e = partida();
     const texto = montarTextoSimulado({
       historico: [],
       mensagem: '',
-      contexto: { numero: 1, epilogo: false, genero: 'piratas', nomes: { j1: 'Ana', j2: 'Beto' }, totalCapitulos: 7 },
+      contexto: { numero: 1, epilogo: false, genero: 'piratas', temaLivre: null, nomes: { j1: 'Ana', j2: 'Beto' }, totalCapitulos: 7 },
     });
     e = motor(e, { tipo: 'capituloGerado', resposta: interpretarResposta(texto, { numero: 1, epilogo: false, nomes: { j1: 'Ana', j2: 'Beto' } }) });
     e = motor(e, { tipo: 'escolha', jogador: 'j1', numero: 1, escolha: { opcaoId: 'x', texto: 'Abrir o baú', estilo: 'ousadia' } });
@@ -58,7 +80,7 @@ describe('narrador simulado', () => {
       const epilogo = n === 8;
       let parciais = 0;
       const texto = await g.gerar(
-        { historico: [], mensagem: '', contexto: { numero: n, epilogo, genero: 'terror', nomes, totalCapitulos: 7 } },
+        { historico: [], mensagem: '', contexto: { numero: n, epilogo, genero: 'terror', temaLivre: null, nomes, totalCapitulos: 7 } },
         () => parciais++,
         new AbortController().signal,
       );

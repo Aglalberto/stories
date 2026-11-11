@@ -61,6 +61,15 @@ export interface Semente {
   objetivo: string;
 }
 
+/** Sugestão de tema feita por um jogador na sala de espera. */
+export type SugestaoTema =
+  | { tipo: 'sortear' }
+  | { tipo: 'genero'; genero: GeneroId }
+  | { tipo: 'livre'; texto: string };
+
+/** Como o tema da partida atual foi definido. */
+export type OrigemTema = 'sorteio' | 'escolha' | 'livre';
+
 export interface InfoJogador {
   nome: string;
   conectado: boolean;
@@ -73,7 +82,12 @@ export interface EstadoJogo {
   idPartida: number;
   fase: Fase;
   jogadores: Record<IdJogador, InfoJogador | null>;
+  /** Gênero da partida; no tema livre, o clima visual escolhido pela IA (null até o capítulo 1). */
   genero: GeneroId | null;
+  /** Tema digitado pelo casal, quando escolheram tema livre. */
+  temaLivre: string | null;
+  origemTema: OrigemTema | null;
+  sugestoes: Record<IdJogador, SugestaoTema | null>;
   semente: Semente | null;
   tituloHistoria: string;
   personagens: Record<IdJogador, Personagem> | null;
@@ -103,4 +117,6 @@ export interface RespostaCapitulo {
   tituloHistoria: string | null;
   personagens: Record<IdJogador, Personagem> | null;
   final: TipoFinal | null;
+  /** Clima visual sugerido pela IA no capítulo 1 (usado no tema livre). */
+  visual: GeneroId | null;
 }

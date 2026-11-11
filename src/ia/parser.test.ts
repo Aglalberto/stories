@@ -10,7 +10,7 @@ const respostaCap1 = `<titulo>A Torre Partida</titulo>
 <cena_j1>Você ouve um sussurro.</cena_j1>
 <cena_j2>Você vê um brilho.</cena_j2>
 <dados>{"titulo_historia":"O Mapa Vivo","personagens":{"j1":{"nome":"Ana","papel":"Cartógrafa","descricao":"Curiosa."},"j2":{"nome":"Beto","papel":"Ladrão","descricao":"Ágil."}},
-"opcoes_j1":[{"texto":"Subir a torre","estilo":"ousadia"},{"texto":"Ler as runas","estilo":"astucia"},{"texto":"Proteger Beto","estilo":"cuidado"}],
+"visual":"fantasia","opcoes_j1":[{"texto":"Subir a torre","estilo":"ousadia"},{"texto":"Ler as runas","estilo":"astucia"},{"texto":"Proteger Beto","estilo":"cuidado"}],
 "opcoes_j2":[{"texto":"Pular o muro","estilo":"ousadia"},{"texto":"Distrair o guarda","estilo":"astucia"},{"texto":"Esperar Ana","estilo":"cuidado"}]}</dados>`;
 
 describe('extrairTag', () => {
@@ -44,6 +44,13 @@ describe('interpretarResposta', () => {
     expect(r.personagens?.j2.papel).toBe('Ladrão');
     expect(r.efeitos).toBeNull();
     expect(r.final).toBeNull();
+    expect(r.visual).toBe('fantasia');
+  });
+
+  it('ignora visual desconhecido ou fora do capítulo 1', () => {
+    const t = respostaCap1.replace('"visual":"fantasia"', '"visual":"faroeste"');
+    expect(interpretarResposta(t, { numero: 1, epilogo: false, nomes }).visual).toBeNull();
+    expect(interpretarResposta(respostaCap1, { numero: 2, epilogo: false, nomes }).visual).toBeNull();
   });
 
   it('aceita JSON dentro de cerca de código e estilos ausentes', () => {

@@ -1,5 +1,5 @@
 import type { StatusRede } from '../rede/transporte';
-import type { Escolha, EstadoJogo, IdJogador } from '../jogo/tipos';
+import type { Escolha, EstadoJogo, IdJogador, SugestaoTema } from '../jogo/tipos';
 
 /** Interface comum que as telas usam, seja no celular anfitrião ou no convidado. */
 export interface Sessao {
@@ -9,8 +9,10 @@ export interface Sessao {
   status: StatusRede;
   demo: boolean;
   escolher(numero: number, escolha: Escolha): void;
-  /** Apenas anfitrião. */
-  sortear?(): void;
+  /** Sugere (ou retira, com null) um tema na sala de espera. */
+  sugerir(s: SugestaoTema | null): void;
+  /** Apenas anfitrião: começa com a sugestão de um dos jogadores, ou sorteia entre as duas. */
+  iniciar?(origem: IdJogador | 'sortearEntre'): void;
   tentarDeNovo?(): void;
   novaPartida?(): void;
   sair(): void;

@@ -3,7 +3,7 @@ import { TOTAL_CAPITULOS } from '../jogo/config';
 
 const PASSOS = [
   ['📱', 'Um celular cria a sala', 'Quem tem a chave da API cria a sala. O outro entra pelo código ou pelo QR code.'],
-  ['🎰', 'O gênero é sorteado', 'Fantasia, ficção científica, noir, terror, piratas ou pós-apocalipse — a sorte decide.'],
+  ['🎨', 'Vocês escolhem o tema', 'Cada um sugere: fantasia, ficção científica, noir, terror, piratas, pós-apocalipse, um tema inventado por vocês ou “Surpresa” para sortear. Quem criou a sala decide.'],
   ['📖', `${TOTAL_CAPITULOS} capítulos + epílogo`, 'A IA escreve cada capítulo na hora, a partir do que vocês decidiram. Uma partida leva uns 20 a 30 minutos.'],
   ['🤫', 'Cenas secretas', 'Cada um recebe um trecho que só ele vê. Contem um ao outro — ou não.'],
   ['🎭', 'Cada um decide por si', 'Escolha uma das três opções ou escreva sua própria ação. A escolha do par só aparece quando os dois decidirem.'],

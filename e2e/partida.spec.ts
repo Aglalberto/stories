@@ -17,7 +17,7 @@ async function escolher(p: Page, numero: number, livre?: string) {
   await cap.getByTestId('confirmar-escolha').click();
 }
 
-test('um casal joga uma partida completa, cada um no seu celular', async ({ browser }) => {
+async function abrirSala(browser: import('@playwright/test').Browser) {
   const contexto = await browser.newContext();
   const ana = await contexto.newPage();
   const beto = await contexto.newPage();
@@ -35,14 +35,27 @@ test('um casal joga uma partida completa, cada um no seu celular', async ({ brow
   await beto.getByTestId('codigo-sala').fill(codigo.toLowerCase());
   await beto.getByTestId('nome-convidado').fill('Beto');
   await beto.getByTestId('confirmar-entrar').click();
-  await expect(beto.getByText('Aguardando Ana sortear a aventura')).toBeVisible();
+  await expect(beto.getByText('Aguardando Ana começar a aventura')).toBeVisible();
+  await expect(ana.getByTestId('escolha-tema')).toBeVisible();
+  return { contexto, ana, beto };
+}
 
-  await expect(ana.getByText('Beto')).toBeVisible();
-  await ana.getByTestId('sortear').click();
+test('um casal joga uma partida completa, cada um no seu celular', async ({ browser }) => {
+  const { contexto, ana, beto } = await abrirSala(browser);
 
-  // O gênero sorteado aparece igual nos dois aparelhos.
-  const generoAna = await ana.getByTestId('genero-sorteado').textContent();
-  await expect(beto.getByTestId('genero-sorteado')).toHaveText(generoAna!);
+  // Cada um sugere um tema; Ana (anfitriã) decide usar o tema livre do Beto.
+  await beto.getByTestId('tema-livre').click();
+  await beto.getByTestId('texto-tema-livre').fill('Férias em Paris que viram espionagem');
+  await beto.getByTestId('sugerir-tema-livre').click();
+  await ana.getByTestId('tema-terror').click();
+  await expect(ana.getByTestId('sugestoes')).toContainText('Férias em Paris que viram espionagem');
+  await expect(beto.getByTestId('sugestoes')).toContainText('Terror Sobrenatural');
+  await ana.getByTestId('comecar-j2').click();
+
+  // O tema escolhido aparece igual nos dois aparelhos.
+  for (const p of [ana, beto]) {
+    await expect(p.getByTestId('tema-escolhido')).toHaveText('“Férias em Paris que viram espionagem”');
+  }
 
   for (let n = 1; n <= 7; n++) {
     await escolher(ana, n);
@@ -62,8 +75,17 @@ test('um casal joga uma partida completa, cada um no seu celular', async ({ brow
 
   // Nova aventura volta os dois para a sala.
   await ana.getByTestId('nova-aventura').click();
-  await expect(ana.getByTestId('sortear')).toBeVisible();
-  await expect(beto.getByText('Aguardando Ana sortear a aventura')).toBeVisible();
+  await expect(ana.getByTestId('escolha-tema')).toBeVisible();
+  await expect(beto.getByText('Aguardando Ana começar a aventura')).toBeVisible();
 
+  await contexto.close();
+});
+
+test('com os dois em "Surpresa", o gênero é sorteado igual nos dois celulares', async ({ browser }) => {
+  const { contexto, ana, beto } = await abrirSala(browser);
+  await ana.getByTestId('comecar').click();
+  const genero = await ana.getByTestId('genero-sorteado').textContent();
+  await expect(beto.getByTestId('genero-sorteado')).toHaveText(genero!);
+  for (const p of [ana, beto]) await expect(p.getByTestId('capitulo-1').getByTestId('opcoes')).toBeVisible({ timeout: 20_000 });
   await contexto.close();
 });

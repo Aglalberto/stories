@@ -12,7 +12,9 @@ export interface PedidoGeracao {
   contexto: {
     numero: number;
     epilogo: boolean;
-    genero: GeneroId;
+    /** Gênero da partida (null no tema livre, antes do capítulo 1). */
+    genero: GeneroId | null;
+    temaLivre: string | null;
     nomes: Record<IdJogador, string>;
     totalCapitulos: number;
   };

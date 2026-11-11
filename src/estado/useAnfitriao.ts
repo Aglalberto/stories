@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState } from 'react';
 import { lerParametros } from '../jogo/config';
-import { sortearGenero } from '../jogo/generos';
+import { aleatorioSeguro, mesmaSugestao, resolverTema } from '../jogo/generos';
 import { criarEstadoInicial, motor, precisaGerar, type Acao } from '../jogo/motor';
-import type { Escolha, EstadoJogo } from '../jogo/tipos';
+import type { Escolha, EstadoJogo, IdJogador, SugestaoTema } from '../jogo/tipos';
 import { ErroFormato, extrairParcial, interpretarResposta } from '../ia/parser';
 import { montarPedido } from '../ia/prompt';
 import type { GeradorHistoria, Turno } from '../ia/gerador';
@@ -39,7 +39,7 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
   const [estado, dispatch] = useReducer(motor, null, () => {
     if (salvo) {
       // Uma geração interrompida pelo recarregamento recomeça do zero.
-      return { ...salvo.estado, gerando: false, parcial: null, jogadores: { ...salvo.estado.jogadores, j2: salvo.estado.jogadores.j2 && { ...salvo.estado.jogadores.j2, conectado: false } } };
+      return { ...criarEstadoInicial(salvo.estado.codigo, op.nome), ...salvo.estado, gerando: false, parcial: null, jogadores: { ...salvo.estado.jogadores, j2: salvo.estado.jogadores.j2 && { ...salvo.estado.jogadores.j2, conectado: false } } };
     }
     return criarEstadoInicial(op.codigo, op.nome);
   });
@@ -67,6 +67,8 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
         } else if (m.t === 'escolha') {
           despachar({ tipo: 'escolha', jogador: 'j2', numero: m.numero, escolha: m.escolha });
           navigator.vibrate?.(40);
+        } else if (m.t === 'sugestao') {
+          despachar({ tipo: 'sugerir', jogador: 'j2', sugestao: m.sugestao });
         }
       },
       aoStatus: setStatus,
@@ -127,7 +129,7 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
           {
             historico: historico.current,
             mensagem: pedido.mensagem,
-            contexto: { numero: pedido.numero, epilogo: pedido.epilogo, genero: estado.genero ?? 'fantasia', nomes, totalCapitulos: estado.totalCapitulos },
+            contexto: { numero: pedido.numero, epilogo: pedido.epilogo, genero: estado.genero, temaLivre: estado.temaLivre, nomes, totalCapitulos: estado.totalCapitulos },
           },
           aoParcial,
           ctrl.signal,
@@ -165,11 +167,19 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
     (numero: number, escolha: Escolha) => despachar({ tipo: 'escolha', jogador: 'j1', numero, escolha }),
     [despachar],
   );
-  const sortear = useCallback(() => {
-    const { genero, semente } = sortearGenero(estadoRef.current.generoAnterior);
-    historico.current = [];
-    despachar({ tipo: 'sortear', genero, semente, idPartida: Date.now() });
-  }, [despachar]);
+  const sugerir = useCallback((s: SugestaoTema | null) => despachar({ tipo: 'sugerir', jogador: 'j1', sugestao: s }), [despachar]);
+  const iniciar = useCallback(
+    (origem: IdJogador | 'sortearEntre') => {
+      const e = estadoRef.current;
+      const { j1, j2 } = e.sugestoes;
+      let sugestao: SugestaoTema | null;
+      if (origem === 'sortearEntre') sugestao = mesmaSugestao(j1, j2) || aleatorioSeguro() < 0.5 ? j1 : j2;
+      else sugestao = e.sugestoes[origem];
+      historico.current = [];
+      despachar({ tipo: 'iniciar', tema: resolverTema(sugestao, e.generoAnterior), idPartida: Date.now() });
+    },
+    [despachar],
+  );
   const tentarDeNovo = useCallback(() => despachar({ tipo: 'limparErro' }), [despachar]);
   const novaPartida = useCallback(() => {
     abortar.current?.abort();
@@ -189,7 +199,8 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
     status,
     demo: op.demo,
     escolher,
-    sortear,
+    sugerir,
+    iniciar,
     tentarDeNovo,
     novaPartida,
     sair,

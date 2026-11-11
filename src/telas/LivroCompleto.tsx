@@ -1,8 +1,7 @@
 import { motion } from 'motion/react';
 import { useState } from 'react';
 import { Botao } from '../componentes/Ui';
-import { GENEROS } from '../jogo/generos';
-import { textoDoLivro } from '../jogo/livro';
+import { nomeDoTema, textoDoLivro } from '../jogo/livro';
 import type { EstadoJogo } from '../jogo/tipos';
 
 export function LivroCompleto({ estado: e, aoFechar }: { estado: EstadoJogo; aoFechar: () => void }) {
@@ -43,7 +42,7 @@ export function LivroCompleto({ estado: e, aoFechar }: { estado: EstadoJogo; aoF
             Fechar ✕
           </button>
         </div>
-        <p className="mt-2 font-titulo text-xs tracking-[0.3em] text-primaria uppercase">{e.genero ? GENEROS[e.genero].nome : ''}</p>
+        <p className="mt-2 font-titulo text-xs tracking-[0.3em] text-primaria uppercase">{nomeDoTema(e)}</p>
         <h1 className="mt-1 font-titulo text-4xl leading-tight font-extrabold">{e.tituloHistoria || 'Sua história'}</h1>
 
         {e.personagens && (

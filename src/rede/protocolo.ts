@@ -1,9 +1,10 @@
-import type { Escolha, EstadoJogo, TextoParcial } from '../jogo/tipos';
+import type { Escolha, EstadoJogo, SugestaoTema, TextoParcial } from '../jogo/tipos';
 
 /** Mensagens do convidado (J2) para o anfitrião (J1). */
 export type MsgConvidado =
   | { t: 'ola'; nome: string }
   | { t: 'escolha'; numero: number; escolha: Escolha }
+  | { t: 'sugestao'; sugestao: SugestaoTema | null }
   | { t: 'ping' };
 
 /** Mensagens do anfitrião para o convidado. */
@@ -20,6 +21,7 @@ export function ehMsgConvidado(m: unknown): m is MsgConvidado {
     const x = m as { numero?: unknown; escolha?: { texto?: unknown } };
     return typeof x.numero === 'number' && typeof x.escolha?.texto === 'string';
   }
+  if (t === 'sugestao') return 'sugestao' in (m as object);
   return t === 'ping';
 }
 

@@ -14,13 +14,14 @@ const resposta = (extra: Partial<RespostaCapitulo> = {}): RespostaCapitulo => ({
   tituloHistoria: 'Livro',
   personagens: null,
   final: null,
+  visual: null,
   ...extra,
 });
 
 function comDupla(): EstadoJogo {
   let e = criarEstadoInicial('ABCDE', 'Ana');
   e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
-  return motor(e, { tipo: 'sortear', genero: 'noir', semente: { lugar: 'l', elemento: 'e', objetivo: 'o' }, idPartida: 1 });
+  return motor(e, { tipo: 'iniciar', tema: { genero: 'noir', temaLivre: null, semente: { lugar: 'l', elemento: 'e', objetivo: 'o' }, origem: 'sorteio' }, idPartida: 1 });
 }
 
 function escolherAmbos(e: EstadoJogo): EstadoJogo {
@@ -47,7 +48,7 @@ describe('efeitos', () => {
 describe('motor', () => {
   it('só sorteia com o parceiro presente', () => {
     const e = criarEstadoInicial('ABCDE', 'Ana');
-    const r = motor(e, { tipo: 'sortear', genero: 'noir', semente: { lugar: 'l', elemento: 'e', objetivo: 'o' }, idPartida: 1 });
+    const r = motor(e, { tipo: 'iniciar', tema: { genero: 'noir', temaLivre: null, semente: null, origem: 'escolha' }, idPartida: 1 });
     expect(r.fase).toBe('lobby');
   });
 
@@ -134,6 +135,38 @@ describe('motor', () => {
     expect(precisaGerar(e)).toBe(false);
     e = motor(e, { tipo: 'limparErro' });
     expect(precisaGerar(e)).toBe(true);
+  });
+});
+
+describe('tema', () => {
+  it('guarda sugestões válidas só na sala de espera', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, { tipo: 'sugerir', jogador: 'j2', sugestao: { tipo: 'livre', texto: '  Férias   em Paris  ' } });
+    e = motor(e, { tipo: 'sugerir', jogador: 'j1', sugestao: { tipo: 'genero', genero: 'terror' } });
+    expect(e.sugestoes).toEqual({ j1: { tipo: 'genero', genero: 'terror' }, j2: { tipo: 'livre', texto: 'Férias em Paris' } });
+    const invalida = motor(e, { tipo: 'sugerir', jogador: 'j2', sugestao: { tipo: 'genero', genero: 'xyz' } as never });
+    expect(invalida.sugestoes.j2).toBeNull();
+    const jogando = motor(e, { tipo: 'iniciar', tema: { genero: 'terror', temaLivre: null, semente: null, origem: 'escolha' }, idPartida: 2 });
+    expect(motor(jogando, { tipo: 'sugerir', jogador: 'j1', sugestao: null })).toBe(jogando);
+  });
+
+  it('no tema livre o gênero visual vem da IA no capítulo 1', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, { tipo: 'iniciar', tema: { genero: null, temaLivre: 'Espiões em Paris', semente: null, origem: 'livre' }, idPartida: 3 });
+    expect(e).toMatchObject({ fase: 'jogando', genero: null, temaLivre: 'Espiões em Paris', origemTema: 'livre' });
+    e = motor(e, { tipo: 'capituloGerado', resposta: resposta({ visual: 'noir' }) });
+    expect(e.genero).toBe('noir');
+    expect(e.temaLivre).toBe('Espiões em Paris');
+  });
+
+  it('usa fantasia se a IA não informar o visual', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, { tipo: 'iniciar', tema: { genero: null, temaLivre: 'Algo', semente: null, origem: 'livre' }, idPartida: 3 });
+    e = motor(e, { tipo: 'capituloGerado', resposta: resposta() });
+    expect(e.genero).toBe('fantasia');
   });
 });
 

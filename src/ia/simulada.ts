@@ -35,8 +35,10 @@ const TITULOS = [
 ];
 
 export function montarTextoSimulado(p: PedidoGeracao): string {
-  const { numero, epilogo, genero, nomes } = p.contexto;
+  const { numero, epilogo, nomes } = p.contexto;
+  const genero = p.contexto.genero ?? 'fantasia';
   const g = GENEROS[genero];
+  const mundo = p.contexto.temaLivre ? `“${p.contexto.temaLivre}”` : g.nome.toLowerCase();
   const [a, b] = [nomes.j1, nomes.j2];
   const titulo = epilogo ? 'Epílogo: o Fim e o Começo' : TITULOS[(numero - 1) % TITULOS.length];
 
@@ -44,10 +46,10 @@ export function montarTextoSimulado(p: PedidoGeracao): string {
     ? `Quando a poeira finalmente baixou, ${a} e ${b} se olharam como quem atravessou um mundo inteiro de mãos dadas. ` +
       `Cada escolha, cada risco e cada gesto de cuidado tinham deixado marcas — algumas doíam, outras brilhavam.\n\n` +
       `— Faríamos tudo de novo? — perguntou ${b}, meio rindo.\n— Faríamos melhor — respondeu ${a}.\n\n` +
-      `E, em algum lugar daquele universo de ${g.nome.toLowerCase()}, alguém começou a contar a história dos dois.`
+      `E, em algum lugar daquele universo de ${mundo}, alguém começou a contar a história dos dois.`
     : `${numero === 1 ? `Tudo começou de repente. ` : `As decisões anteriores ainda ecoavam quando o caminho mudou outra vez. `}` +
       `${a} percebeu primeiro o detalhe estranho no ar; ${b} sentiu que algo os observava. ` +
-      `O mundo de ${g.nome.toLowerCase()} se abria diante deles, cheio de promessas e armadilhas.\n\n` +
+      `O mundo de ${mundo} se abria diante deles, cheio de promessas e armadilhas.\n\n` +
       `— Você confia em mim? — perguntou ${a}.\n— Sempre. Mas fique perto — respondeu ${b}.\n\n` +
       `À frente, três caminhos se desenhavam, e nenhum deles parecia seguro. Era hora de decidir.`;
 
@@ -68,6 +70,7 @@ export function montarTextoSimulado(p: PedidoGeracao): string {
 
   if (numero === 1) {
     dados.titulo_historia = `Crônicas de ${a} e ${b}`;
+    dados.visual = genero;
     dados.personagens = {
       j1: { nome: a, papel: 'Exploradora destemida', descricao: `${a} nunca recusa um desafio.` },
       j2: { nome: b, papel: 'Estrategista sonhador', descricao: `${b} enxerga o que os outros não veem.` },

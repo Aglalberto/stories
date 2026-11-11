@@ -25,6 +25,7 @@ export const LIMITES = {
 } as const;
 
 export const MAX_ACAO_LIVRE = 140;
+export const MAX_TEMA_LIVRE = 120;
 
 /** Parâmetros de URL úteis para demonstração e testes. */
 export function lerParametros(search: string = typeof location !== 'undefined' ? location.search : '') {

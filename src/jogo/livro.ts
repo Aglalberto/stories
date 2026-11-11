@@ -7,12 +7,18 @@ export const NOMES_FINAL: Record<TipoFinal, { titulo: string; icone: string; fra
   tragico: { titulo: 'Final trágico', icone: '🥀', frase: 'A história cobrou seu preço. Que a próxima seja diferente.' },
 };
 
+/** Nome do tema da partida para exibir (gênero ou tema livre). */
+export function nomeDoTema(e: Pick<EstadoJogo, 'genero' | 'temaLivre'>): string {
+  if (e.temaLivre) return `Tema livre: ${e.temaLivre}`;
+  return e.genero ? GENEROS[e.genero].nome : '';
+}
+
 /** Texto corrido do livro completo, para compartilhar ou baixar. */
 export function textoDoLivro(e: EstadoJogo): string {
   const nome = (j: 'j1' | 'j2') => e.jogadores[j]?.nome ?? j.toUpperCase();
   const linhas: string[] = [];
   linhas.push(e.tituloHistoria || 'Livro-Jogo a Dois');
-  if (e.genero) linhas.push(`${GENEROS[e.genero].nome} · com ${nome('j1')} e ${nome('j2')}`);
+  if (e.genero || e.temaLivre) linhas.push(`${nomeDoTema(e)} · com ${nome('j1')} e ${nome('j2')}`);
   linhas.push('');
   for (const c of e.capitulos) {
     linhas.push(c.epilogo ? `EPÍLOGO — ${c.titulo}` : `CAPÍTULO ${c.numero} — ${c.titulo}`);
