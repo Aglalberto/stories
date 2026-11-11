@@ -1,6 +1,6 @@
 import { animate, motion, useMotionValue } from 'motion/react';
 import { useEffect, useMemo, useState } from 'react';
-import { GENEROS, LISTA_GENEROS } from '../jogo/generos';
+import { GENEROS, LISTA_GENEROS, TROPO_POR_ID } from '../jogo/generos';
 import type { GeneroId, OrigemTema, Semente } from '../jogo/tipos';
 
 const ALTURA = 76;
@@ -51,6 +51,7 @@ function TemaEscolhido({ genero, temaLivre, semente, rapido, aoTerminar }: Props
           {temaLivre ? `“${temaLivre}”` : g?.nome}
         </h2>
         <p className="mt-3 text-suave">{temaLivre ? 'O narrador vai criar um mundo inteiro a partir disso.' : g?.chamada}</p>
+        {!temaLivre && semente?.tropo && <p className="mt-3 font-titulo text-secundaria" data-testid="tropo-escolhido">💞 {TROPO_POR_ID[semente.tropo].nome}</p>}
         {!temaLivre && semente && <p className="mt-4 text-sm leading-relaxed text-texto/80 italic">Onde tudo começa: {semente.lugar}…</p>}
       </motion.div>
     </motion.div>
@@ -127,6 +128,7 @@ function RoloSorteio({ genero, semente, rapido, aoTerminar }: PropsRoleta & { ge
           {g.icone} {g.nome}
         </h2>
         <p className="mt-2 text-suave">{g.chamada}</p>
+        {semente?.tropo && <p className="mt-3 font-titulo text-secundaria">💞 {TROPO_POR_ID[semente.tropo].nome}</p>}
         {semente && (
           <p className="mt-4 text-sm leading-relaxed text-texto/80 italic">
             Onde tudo começa: {semente.lugar}…

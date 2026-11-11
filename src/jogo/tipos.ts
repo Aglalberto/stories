@@ -1,7 +1,19 @@
 export type IdJogador = 'j1' | 'j2';
 export const JOGADORES: readonly IdJogador[] = ['j1', 'j2'] as const;
 
-export type GeneroId = 'fantasia' | 'scifi' | 'noir' | 'terror' | 'piratas' | 'apocalipse';
+export type GeneroId =
+  | 'fantasia'
+  | 'scifi'
+  | 'noir'
+  | 'terror'
+  | 'piratas'
+  | 'apocalipse'
+  | 'comedia'
+  | 'epoca'
+  | 'regencia'
+  | 'romancemisterio';
+
+export type TropoId = 'amigos' | 'idade' | 'inimigos' | 'segundachance' | 'fingido' | 'conveniencia' | 'proibido' | 'umacama';
 
 /** Estilo de uma opção: orienta o tom da escolha e as consequências. */
 export type EstiloOpcao = 'ousadia' | 'astucia' | 'cuidado';
@@ -59,12 +71,14 @@ export interface Semente {
   lugar: string;
   elemento: string;
   objetivo: string;
+  /** Tropo romântico (só nos gêneros de romance). */
+  tropo?: TropoId | null;
 }
 
 /** Sugestão de tema feita por um jogador na sala de espera. */
 export type SugestaoTema =
   | { tipo: 'sortear' }
-  | { tipo: 'genero'; genero: GeneroId }
+  | { tipo: 'genero'; genero: GeneroId; tropo?: TropoId }
   | { tipo: 'livre'; texto: string };
 
 /** Como o tema da partida atual foi definido. */
@@ -88,6 +102,8 @@ export interface EstadoJogo {
   temaLivre: string | null;
   origemTema: OrigemTema | null;
   sugestoes: Record<IdJogador, SugestaoTema | null>;
+  /** Conteúdo adulto (18+) confirmado pelo anfitrião. */
+  adulto: boolean;
   semente: Semente | null;
   tituloHistoria: string;
   personagens: Record<IdJogador, Personagem> | null;

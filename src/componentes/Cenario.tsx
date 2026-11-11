@@ -9,6 +9,8 @@ const QTD: Record<Ambiente | 'padrao', number> = {
   nevoa: 6,
   ondas: 4,
   brasas: 30,
+  petalas: 20,
+  coracoes: 16,
   padrao: 18,
 };
 

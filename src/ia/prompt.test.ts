@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { criarEstadoInicial, motor } from '../jogo/motor';
 import type { EstadoJogo } from '../jogo/tipos';
-import { montarPedido, PROMPT_SISTEMA } from './prompt';
+import { montarPedido, PROMPT_SISTEMA, PROMPT_SISTEMA_ADULTO, promptSistema } from './prompt';
 import { criarGeradorSimulado, montarTextoSimulado } from './simulada';
 import { interpretarResposta } from './parser';
 
@@ -19,6 +19,30 @@ describe('prompt', () => {
   it('o prompt de sistema é fixo e em português', () => {
     expect(PROMPT_SISTEMA).toContain('português do Brasil');
     expect(PROMPT_SISTEMA).not.toMatch(/\$\{/);
+  });
+
+  it('o modo 18+ usa outro prompt fixo, sempre sem cenas explícitas e só com adultos', () => {
+    expect(promptSistema(false)).toBe(PROMPT_SISTEMA);
+    expect(promptSistema(true)).toBe(PROMPT_SISTEMA_ADULTO);
+    expect(PROMPT_SISTEMA).toContain('Classificação indicativa: 14 anos');
+    expect(PROMPT_SISTEMA_ADULTO).not.toContain('14 anos');
+    expect(PROMPT_SISTEMA_ADULTO).toContain('nunca descreva atos sexuais de forma explícita');
+    expect(PROMPT_SISTEMA_ADULTO).toContain('maiores de 18');
+    expect(PROMPT_SISTEMA_ADULTO).toContain('"regencia"');
+  });
+
+  it('inclui o tropo romântico no capítulo 1', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, {
+      tipo: 'iniciar',
+      tema: { genero: 'regencia', temaLivre: null, semente: { lugar: 'um baile', elemento: 'uma luva', objetivo: 'evitar o escândalo', tropo: 'amigos' }, origem: 'escolha' },
+      idPartida: 1,
+    });
+    const p = montarPedido(e);
+    expect(p.mensagem).toContain('Gênero: Romance de Regência');
+    expect(p.mensagem).toContain('Tropo romântico: Friends to lovers');
+    expect(p.mensagem).toContain('O romance entre Ana e Beto é o fio central.');
   });
 
   it('monta o pedido do capítulo 1 com gênero, semente e nomes', () => {
@@ -44,7 +68,7 @@ describe('prompt', () => {
     const g = criarGeradorSimulado({ atrasoMs: 0 });
     const nomes = { j1: 'Ana', j2: 'Beto' };
     const texto = await g.gerar(
-      { historico: [], mensagem: '', contexto: { numero: 1, epilogo: false, genero: null, temaLivre: 'Bruxas', nomes, totalCapitulos: 7 } },
+      { historico: [], mensagem: '', contexto: { numero: 1, epilogo: false, genero: null, temaLivre: 'Bruxas', adulto: false, nomes, totalCapitulos: 7 } },
       () => undefined,
       new AbortController().signal,
     );
@@ -58,7 +82,7 @@ describe('prompt', () => {
     const texto = montarTextoSimulado({
       historico: [],
       mensagem: '',
-      contexto: { numero: 1, epilogo: false, genero: 'piratas', temaLivre: null, nomes: { j1: 'Ana', j2: 'Beto' }, totalCapitulos: 7 },
+      contexto: { numero: 1, epilogo: false, genero: 'piratas', temaLivre: null, adulto: false, nomes: { j1: 'Ana', j2: 'Beto' }, totalCapitulos: 7 },
     });
     e = motor(e, { tipo: 'capituloGerado', resposta: interpretarResposta(texto, { numero: 1, epilogo: false, nomes: { j1: 'Ana', j2: 'Beto' } }) });
     e = motor(e, { tipo: 'escolha', jogador: 'j1', numero: 1, escolha: { opcaoId: 'x', texto: 'Abrir o baú', estilo: 'ousadia' } });
@@ -80,7 +104,7 @@ describe('narrador simulado', () => {
       const epilogo = n === 8;
       let parciais = 0;
       const texto = await g.gerar(
-        { historico: [], mensagem: '', contexto: { numero: n, epilogo, genero: 'terror', temaLivre: null, nomes, totalCapitulos: 7 } },
+        { historico: [], mensagem: '', contexto: { numero: n, epilogo, genero: 'terror', temaLivre: null, adulto: false, nomes, totalCapitulos: 7 } },
         () => parciais++,
         new AbortController().signal,
       );

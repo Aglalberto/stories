@@ -13,6 +13,8 @@ export interface Sessao {
   sugerir(s: SugestaoTema | null): void;
   /** Apenas anfitrião: começa com a sugestão de um dos jogadores, ou sorteia entre as duas. */
   iniciar?(origem: IdJogador | 'sortearEntre'): void;
+  /** Apenas anfitrião: liga/desliga o conteúdo adulto (18+). */
+  definirAdulto?(adulto: boolean): void;
   tentarDeNovo?(): void;
   novaPartida?(): void;
   sair(): void;

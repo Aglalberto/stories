@@ -89,3 +89,20 @@ test('com os dois em "Surpresa", o gênero é sorteado igual nos dois celulares'
   for (const p of [ana, beto]) await expect(p.getByTestId('capitulo-1').getByTestId('opcoes')).toBeVisible({ timeout: 20_000 });
   await contexto.close();
 });
+
+test('romance com tropo e modo 18+', async ({ browser }) => {
+  const { contexto, ana, beto } = await abrirSala(browser);
+  ana.on('dialog', (d) => d.accept());
+  await ana.getByTestId('modo-adulto').check();
+  await expect(beto.getByTestId('aviso-adulto')).toBeVisible();
+  await ana.getByTestId('tema-regencia').click();
+  await ana.getByTestId('tropo-idade').click();
+  await beto.getByTestId('tema-regencia').click();
+  await beto.getByTestId('tropo-idade').click();
+  await ana.getByTestId('comecar').click();
+  for (const p of [ana, beto]) {
+    await expect(p.getByTestId('tema-escolhido')).toHaveText('Romance de Regência');
+    await expect(p.getByTestId('tropo-escolhido')).toHaveText('💞 Age gap');
+  }
+  await contexto.close();
+});

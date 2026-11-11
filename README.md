@@ -9,9 +9,12 @@ Aventura interativa **cooperativa** para um casal: cada pessoa joga no próprio 
 1. Um celular **cria a sala** e mostra um código e um QR code. É ele que narra a história, então precisa da chave da API da Anthropic.
 2. O outro celular **entra na sala** pelo código ou pelo QR code.
 3. **Cada um sugere um tema** na sala de espera:
-   - um dos 6 gêneros (Fantasia Épica, Ficção Científica, Mistério Noir, Terror Sobrenatural, Aventura Pirata ou Pós-Apocalipse);
+   - um gênero de **aventura** (Fantasia Épica, Ficção Científica, Mistério Noir, Terror Sobrenatural, Aventura Pirata ou Pós-Apocalipse);
+   - um gênero de **romance** (Comédia Romântica, Romance de Época, Romance de Regência ou Romance de Mistério), com um **tropo** opcional: friends to lovers, age gap, enemies to lovers, segunda chance, namoro de mentira, casamento por conveniência, amor proibido ou só uma cama;
    - 🎲 **Surpresa**, para sortear (sem repetir o gênero da partida anterior);
    - ✍️ **tema livre**, digitado por vocês (ex.: “Férias em Paris que viram espionagem”). Nesse caso, a IA inventa o cenário e escolhe o clima visual mais próximo para o fundo animado.
+
+   Quem criou a sala pode ativar o **conteúdo adulto (18+)**, depois de confirmar que os dois são maiores de idade: romance sensual, linguagem forte e temas maduros. As cenas íntimas terminam em corte de cena, sem descrição explícita, conforme as regras de uso da API da Anthropic, e todos os personagens são sempre adultos.
 
    Quem criou a sala vê as duas sugestões e começa com uma delas ou sorteia entre as duas. Nos gêneros prontos, também são sorteados o cenário inicial, um elemento misterioso e o objetivo da dupla.
 4. São **7 capítulos com escolhas e um epílogo** (cerca de 20 a 30 minutos). Em cada capítulo:

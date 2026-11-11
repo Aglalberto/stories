@@ -1,10 +1,10 @@
 import { AnimatePresence, motion } from 'motion/react';
 import QRCode from 'qrcode';
-import { useEffect, useState } from 'react';
+import { Fragment, useEffect, useState } from 'react';
 import { Botao, Cartao } from '../componentes/Ui';
 import type { Sessao } from '../estado/sessao';
 import { MAX_TEMA_LIVRE } from '../jogo/config';
-import { LISTA_GENEROS, limparTemaLivre, mesmaSugestao, rotuloSugestao } from '../jogo/generos';
+import { GENEROS, LISTA_GENEROS, TROPOS, limparTemaLivre, mesmaSugestao, rotuloSugestao } from '../jogo/generos';
 import type { IdJogador, SugestaoTema } from '../jogo/tipos';
 
 export function linkDaSala(codigo: string): string {
@@ -130,10 +130,20 @@ function EscolhaTema({ sessao }: { sessao: Sessao }) {
         <Chip ativo={ativo({ tipo: 'sortear' })} onClick={() => escolher({ tipo: 'sortear' })} testid="tema-sortear" largo>
           🎲 Surpresa <span className="text-suave/80">— sortear</span>
         </Chip>
-        {LISTA_GENEROS.map((g) => (
-          <Chip key={g.id} ativo={ativo({ tipo: 'genero', genero: g.id })} onClick={() => escolher({ tipo: 'genero', genero: g.id })} testid={`tema-${g.id}`}>
-            <span className="text-lg">{g.icone}</span> {g.nome}
-          </Chip>
+        {[false, true].map((romance) => (
+          <Fragment key={String(romance)}>
+            <p className="col-span-2 mt-2 text-[0.7rem] tracking-[0.25em] text-suave uppercase">{romance ? 'Romance' : 'Aventura'}</p>
+            {LISTA_GENEROS.filter((g) => !!g.romance === romance).map((g) => (
+              <Chip
+                key={g.id}
+                ativo={!livreAberto && minha?.tipo === 'genero' && minha.genero === g.id}
+                onClick={() => escolher({ tipo: 'genero', genero: g.id })}
+                testid={`tema-${g.id}`}
+              >
+                <span className="text-lg">{g.icone}</span> {g.nome}
+              </Chip>
+            ))}
+          </Fragment>
         ))}
         <Chip ativo={livreAberto || minha?.tipo === 'livre'} onClick={() => setLivreAberto(true)} testid="tema-livre" largo>
           ✍️ Tema livre <span className="text-suave/80">— vocês inventam</span>
@@ -141,6 +151,21 @@ function EscolhaTema({ sessao }: { sessao: Sessao }) {
       </div>
 
       <AnimatePresence initial={false}>
+        {!livreAberto && minha?.tipo === 'genero' && GENEROS[minha.genero].romance && (
+          <motion.div key="tropos" initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+            <p className="mt-4 mb-2 text-sm text-suave">Tropo romântico</p>
+            <div className="flex flex-wrap gap-1.5" data-testid="tropos">
+              <TropoChip ativo={!minha.tropo} onClick={() => sessao.sugerir({ tipo: 'genero', genero: minha.genero })} testid="tropo-qualquer">
+                🎲 Qualquer
+              </TropoChip>
+              {TROPOS.map((t) => (
+                <TropoChip key={t.id} ativo={minha.tropo === t.id} onClick={() => sessao.sugerir({ tipo: 'genero', genero: minha.genero, tropo: t.id })} testid={`tropo-${t.id}`}>
+                  {t.nome}
+                </TropoChip>
+              ))}
+            </div>
+          </motion.div>
+        )}
         {livreAberto && (
           <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
             <textarea
@@ -166,11 +191,53 @@ function EscolhaTema({ sessao }: { sessao: Sessao }) {
         )}
       </AnimatePresence>
 
+      <ConteudoAdulto sessao={sessao} />
+
       <div className="mt-4 space-y-1.5 border-t border-borda pt-3 text-sm" data-testid="sugestoes">
         <LinhaSugestao nome="Você" sugestao={minha} />
         {e.jogadores[outro] && <LinhaSugestao nome={e.jogadores[outro]!.nome} sugestao={daOutra} />}
       </div>
     </Cartao>
+  );
+}
+
+function TropoChip({ ativo, onClick, children, testid }: { ativo: boolean; onClick: () => void; children: React.ReactNode; testid: string }) {
+  return (
+    <button
+      onClick={onClick}
+      aria-pressed={ativo}
+      data-testid={testid}
+      className={`rounded-full border px-3 py-1.5 text-xs transition-colors ${ativo ? 'border-secundaria bg-secundaria/20 text-texto' : 'border-borda text-suave'}`}
+    >
+      {children}
+    </button>
+  );
+}
+
+/** Anfitrião liga o modo 18+ (com confirmação); o convidado só vê o estado. */
+function ConteudoAdulto({ sessao }: { sessao: Sessao }) {
+  const adulto = !!sessao.estado?.adulto;
+  if (!sessao.definirAdulto) {
+    return adulto ? (
+      <p className="mt-4 rounded-xl bg-rose-500/15 px-3 py-2 text-sm text-rose-100" data-testid="aviso-adulto">
+        🔞 Conteúdo adulto ativado nesta sala
+      </p>
+    ) : null;
+  }
+  const alternar = () => {
+    if (adulto) return sessao.definirAdulto!(false);
+    if (confirm('Conteúdo adulto (18+): romance sensual, linguagem forte e temas maduros, sem cenas explícitas. Vocês dois confirmam que são maiores de 18 anos?')) {
+      sessao.definirAdulto!(true);
+    }
+  };
+  return (
+    <label className="mt-4 flex items-center gap-3 rounded-xl border border-borda bg-white/[0.03] px-3 py-2.5">
+      <input type="checkbox" className="h-5 w-5 accent-[var(--primaria)]" checked={adulto} onChange={alternar} data-testid="modo-adulto" />
+      <span className="text-sm">
+        🔞 Conteúdo adulto (18+)
+        <span className="block text-xs text-suave">Romance sensual e temas maduros; cenas íntimas sem descrição explícita.</span>
+      </span>
+    </label>
   );
 }
 

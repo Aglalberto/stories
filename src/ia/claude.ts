@@ -1,6 +1,6 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { MODELO } from '../jogo/config';
-import { PROMPT_SISTEMA } from './prompt';
+import { promptSistema } from './prompt';
 import { ErroGeracao, type GeradorHistoria, type PedidoGeracao } from './gerador';
 
 /**
@@ -27,7 +27,7 @@ export function criarGeradorClaude(apiKey: string): GeradorHistoria {
             thinking: { type: 'between_tools' },
             // Cache automático: cada capítulo reaproveita o prefixo do anterior.
             cache_control: { type: 'ephemeral' },
-            system: PROMPT_SISTEMA,
+            system: promptSistema(pedido.contexto.adulto),
             messages,
             // Se um filtro de segurança recusar um trecho, a API tenta outro modelo na mesma chamada.
             betas: ['server-side-fallback-2026-07-01'],

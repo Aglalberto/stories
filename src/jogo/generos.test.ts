@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gerarCodigoSala, LISTA_GENEROS, mesmaSugestao, normalizarCodigo, resolverTema, rotuloSugestao, sortearGenero, validarSugestao } from './generos';
+import { GENEROS, gerarCodigoSala, LISTA_GENEROS, TROPOS, mesmaSugestao, normalizarCodigo, resolverTema, rotuloSugestao, sortearGenero, validarSugestao } from './generos';
 
 describe('sorteio', () => {
   it('nunca repete o gênero anterior', () => {
@@ -63,5 +63,35 @@ describe('tema escolhido', () => {
     expect(mesmaSugestao({ tipo: 'genero', genero: 'noir' }, { tipo: 'genero', genero: 'terror' })).toBe(false);
     expect(rotuloSugestao({ tipo: 'genero', genero: 'piratas' })).toBe('🏴‍☠️ Aventura Pirata');
     expect(rotuloSugestao(null)).toBe('🎲 Surpresa');
+  });
+});
+
+describe('romance', () => {
+  it('tem os quatro gêneros de romance', () => {
+    expect(LISTA_GENEROS.filter((g) => g.romance).map((g) => g.id)).toEqual(['comedia', 'epoca', 'regencia', 'romancemisterio']);
+  });
+  it('mantém o tropo escolhido e sorteia um quando não há', () => {
+    expect(resolverTema({ tipo: 'genero', genero: 'regencia', tropo: 'idade' }, null).semente!.tropo).toBe('idade');
+    const t = resolverTema({ tipo: 'genero', genero: 'comedia' }, null).semente!.tropo;
+    expect(TROPOS.map((x) => x.id)).toContain(t);
+  });
+  it('gêneros de aventura não têm tropo', () => {
+    expect(resolverTema({ tipo: 'genero', genero: 'noir' }, null).semente!.tropo).toBeNull();
+  });
+  it('o sorteio também inclui romance, com tropo', () => {
+    const vistos = new Set<string>();
+    for (let i = 0; i < 400; i++) {
+      const t = resolverTema(null, null);
+      vistos.add(t.genero!);
+      if (GENEROS[t.genero!].romance) expect(t.semente!.tropo).toBeTruthy();
+    }
+    expect(vistos.has('regencia')).toBe(true);
+  });
+  it('valida tropos vindos da rede', () => {
+    expect(validarSugestao({ tipo: 'genero', genero: 'epoca', tropo: 'amigos' })).toEqual({ tipo: 'genero', genero: 'epoca', tropo: 'amigos' });
+    expect(validarSugestao({ tipo: 'genero', genero: 'epoca', tropo: 'xyz' })).toEqual({ tipo: 'genero', genero: 'epoca' });
+    expect(validarSugestao({ tipo: 'genero', genero: 'noir', tropo: 'amigos' })).toEqual({ tipo: 'genero', genero: 'noir' });
+    expect(rotuloSugestao({ tipo: 'genero', genero: 'comedia', tropo: 'amigos' })).toBe('💘 Comédia Romântica · Friends to lovers');
+    expect(mesmaSugestao({ tipo: 'genero', genero: 'comedia', tropo: 'amigos' }, { tipo: 'genero', genero: 'comedia' })).toBe(false);
   });
 });

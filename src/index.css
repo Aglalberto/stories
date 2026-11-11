@@ -205,6 +205,51 @@ button {
   }
 }
 
+.amb-petalas .particula {
+  width: 10px;
+  height: 7px;
+  border-radius: 70% 0 70% 0;
+  background: linear-gradient(135deg, #ffd1dc, var(--secundaria));
+  opacity: 0.8;
+  animation: petala var(--dur) linear var(--atraso) infinite;
+}
+@keyframes petala {
+  0% {
+    transform: translate3d(0, -12vh, 0) rotate(0deg);
+  }
+  50% {
+    transform: translate3d(calc(var(--dx) * 0.5), 50vh, 0) rotate(200deg);
+  }
+  100% {
+    transform: translate3d(var(--dx), 112vh, 0) rotate(420deg);
+  }
+}
+
+.amb-coracoes .particula {
+  width: auto;
+  height: auto;
+  border-radius: 0;
+  color: var(--primaria);
+  font-size: 14px;
+  animation: coracao var(--dur) ease-in var(--atraso) infinite;
+}
+.amb-coracoes .particula::before {
+  content: '♥';
+}
+@keyframes coracao {
+  0% {
+    transform: translate3d(0, 12vh, 0) scale(0.6);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(var(--dx), -105vh, 0) scale(1.2);
+    opacity: 0;
+  }
+}
+
 .amb-padrao .particula {
   width: 3px;
   height: 3px;

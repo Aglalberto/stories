@@ -1,7 +1,7 @@
 import { MAX_TEMA_LIVRE } from './config';
-import type { GeneroId, OrigemTema, Semente, SugestaoTema } from './tipos';
+import type { GeneroId, OrigemTema, Semente, SugestaoTema, TropoId } from './tipos';
 
-export type Ambiente = 'vagalumes' | 'estrelas' | 'chuva' | 'nevoa' | 'ondas' | 'brasas';
+export type Ambiente = 'vagalumes' | 'estrelas' | 'chuva' | 'nevoa' | 'ondas' | 'brasas' | 'petalas' | 'coracoes';
 
 export interface Genero {
   id: GeneroId;
@@ -10,6 +10,8 @@ export interface Genero {
   chamada: string;
   tom: string;
   ambiente: Ambiente;
+  /** Gêneros de romance aceitam um tropo romântico. */
+  romance?: boolean;
   cores: { fundo1: string; fundo2: string; primaria: string; secundaria: string };
   lugares: string[];
   elementos: string[];
@@ -197,9 +199,152 @@ export const GENEROS: Record<GeneroId, Genero> = {
       'atravessar a zona morta com um segredo que pode salvar todos',
     ],
   },
+  comedia: {
+    id: 'comedia',
+    nome: 'Comédia Romântica',
+    icone: '💘',
+    chamada: 'Encontros desastrados, mal-entendidos e um amor que ninguém planejou.',
+    tom: 'comédia romântica leve e divertida, com diálogos espirituosos, situações constrangedoras e muito charme; o romance entre os protagonistas é o centro da história',
+    ambiente: 'coracoes',
+    romance: true,
+    cores: { fundo1: '#1f0a17', fundo2: '#4a1735', primaria: '#ff8fb1', secundaria: '#ffd36e' },
+    lugares: [
+      'o casamento da melhor amiga, onde nada sai como planejado',
+      'uma pousada charmosa reservada por engano para os dois',
+      'um food truck disputando o melhor ponto de um festival',
+      'um voo cancelado e a última vaga num carro alugado',
+      'um escritório às vésperas da festa de fim de ano',
+    ],
+    elementos: [
+      'uma aposta boba feita depois de duas taças de vinho',
+      'um cachorro que se recusa a sair do colo de um dos dois',
+      'um áudio constrangedor enviado para a pessoa errada',
+      'um bolo de casamento de quatro andares sob responsabilidade da dupla',
+      'um ex que aparece com o par perfeito',
+    ],
+    objetivos: [
+      'salvar o casamento dos amigos sem admitir o que sentem',
+      'vencer um concurso de casais fingindo ser um casal',
+      'chegar a tempo para o pedido de casamento de outra pessoa',
+      'manter a pousada aberta até o fim da temporada',
+      'convencer a família de que estão juntos há anos',
+    ],
+  },
+  epoca: {
+    id: 'epoca',
+    nome: 'Romance de Época',
+    icone: '🌹',
+    chamada: 'Cartas secretas, bailes e um amor contra as convenções.',
+    tom: 'romance de época (séculos 19 e início do 20), com costumes rígidos, olhares proibidos, cartas e segredos de família; o romance entre os protagonistas é o centro da história',
+    ambiente: 'petalas',
+    romance: true,
+    cores: { fundo1: '#1a0d0b', fundo2: '#43201a', primaria: '#e8b77a', secundaria: '#d97a8a' },
+    lugares: [
+      'uma fazenda de café no interior do Brasil Império',
+      'um navio a vapor rumo à Europa em 1890',
+      'um teatro de ópera em Paris na Belle Époque',
+      'uma casa de chá em Lisboa no começo do século 20',
+      'um casarão no Rio de Janeiro às vésperas da Abolição',
+    ],
+    elementos: [
+      'cartas de amor assinadas com uma inicial misteriosa',
+      'um noivado arranjado anunciado no pior momento',
+      'um retrato pintado que esconde uma mensagem',
+      'um medalhão com o retrato de outra pessoa',
+      'um convite para um baile de máscaras',
+    ],
+    objetivos: [
+      'impedir um casamento arranjado sem desonrar a família',
+      'recuperar uma herança roubada antes do fim da estação',
+      'descobrir quem escreve as cartas anônimas',
+      'fugir juntos antes que o navio zarpe',
+      'salvar a fazenda da ruína',
+    ],
+  },
+  regencia: {
+    id: 'regencia',
+    nome: 'Romance de Regência',
+    icone: '💌',
+    chamada: 'Temporada de bailes em Londres, fofocas e reputações em jogo.',
+    tom: 'romance de Regência inglesa (1811–1820), com bailes, cartões de dança, colunas de fofoca, títulos de nobreza e diálogos afiados; o romance entre os protagonistas é o centro da história',
+    ambiente: 'petalas',
+    romance: true,
+    cores: { fundo1: '#0f1424', fundo2: '#2b3352', primaria: '#f0d9a8', secundaria: '#c9a7e8' },
+    lugares: [
+      'um salão de baile em Londres, na abertura da temporada de 1813',
+      'uma propriedade no campo durante uma longa visita de verão',
+      'as termas de Bath, cheias de fofocas',
+      'uma biblioteca onde ninguém deveria estar à meia-noite',
+      'uma carruagem atolada numa estrada de chuva',
+    ],
+    elementos: [
+      'um cartão de dança com um nome riscado',
+      'uma coluna de fofocas que sabe demais',
+      'uma luva esquecida no lugar mais comprometedor',
+      'um duque cheio de dívidas e com um segredo',
+      'uma aposta registrada no livro do clube de cavalheiros',
+    ],
+    objetivos: [
+      'escapar de um escândalo antes que ele chegue aos jornais',
+      'garantir um casamento vantajoso sem perder o coração',
+      'desmascarar o autor da coluna de fofocas',
+      'conquistar a aprovação de uma matriarca implacável',
+      'salvar a reputação da irmã mais nova',
+    ],
+  },
+  romancemisterio: {
+    id: 'romancemisterio',
+    nome: 'Romance de Mistério',
+    icone: '🗝️',
+    chamada: 'Paixão e suspense: um segredo do passado e ninguém acima de suspeita.',
+    tom: 'romance de mistério, com suspense, pistas, segredos do passado e atração crescente entre os protagonistas, que é tão importante quanto o mistério',
+    ambiente: 'nevoa',
+    romance: true,
+    cores: { fundo1: '#12080f', fundo2: '#36142b', primaria: '#f2a7c3', secundaria: '#9fb4ff' },
+    lugares: [
+      'um hotel antigo na serra durante um fim de semana de chuva',
+      'uma ilha particular onde o anfitrião desapareceu',
+      'um vinhedo no Sul com uma safra amaldiçoada',
+      'uma livraria herdada com um quarto trancado',
+      'um trem noturno cruzando a Europa',
+    ],
+    elementos: [
+      'um diário com páginas arrancadas',
+      'uma aliança encontrada no lugar errado',
+      'um bilhete que diz "não confie em ninguém"',
+      'uma foto antiga dos dois juntos que nenhum lembra de ter tirado',
+      'uma chave sem fechadura',
+    ],
+    objetivos: [
+      'descobrir o que aconteceu com o primeiro amor de um deles',
+      'provar a inocência um do outro',
+      'encontrar o testamento escondido antes dos outros herdeiros',
+      'desvendar um desaparecimento sem se apaixonar pelo principal suspeito',
+      'revelar o segredo que separou as famílias dos dois',
+    ],
+  },
 };
 
 export const LISTA_GENEROS: Genero[] = Object.values(GENEROS);
+
+export interface Tropo {
+  id: TropoId;
+  nome: string;
+  descricao: string;
+}
+
+export const TROPOS: Tropo[] = [
+  { id: 'amigos', nome: 'Friends to lovers', descricao: 'melhores amigos há anos que finalmente percebem que é mais que amizade' },
+  { id: 'idade', nome: 'Age gap', descricao: 'uma diferença de idade marcante entre os dois (ambos adultos)' },
+  { id: 'inimigos', nome: 'Enemies to lovers', descricao: 'rivais que se provocam até não conseguirem mais negar a atração' },
+  { id: 'segundachance', nome: 'Segunda chance', descricao: 'ex-amores que se reencontram anos depois, com contas a acertar' },
+  { id: 'fingido', nome: 'Namoro de mentira', descricao: 'fingem ser um casal por conveniência, e a mentira começa a virar verdade' },
+  { id: 'conveniencia', nome: 'Casamento por conveniência', descricao: 'um casamento arranjado ou de fachada que pode virar amor' },
+  { id: 'proibido', nome: 'Amor proibido', descricao: 'um amor que famílias, regras ou lados opostos não permitem' },
+  { id: 'umacama', nome: 'Só uma cama', descricao: 'proximidade forçada: presos juntos, um único quarto, uma única cama' },
+];
+
+export const TROPO_POR_ID = Object.fromEntries(TROPOS.map((t) => [t.id, t])) as Record<TropoId, Tropo>;
 
 export type Aleatorio = () => number;
 
@@ -217,12 +362,14 @@ function escolher<T>(lista: readonly T[], rnd: Aleatorio): T {
   return lista[Math.floor(rnd() * lista.length) % lista.length];
 }
 
-export function sortearSemente(genero: GeneroId, rnd: Aleatorio = aleatorioSeguro): Semente {
+export function sortearSemente(genero: GeneroId, rnd: Aleatorio = aleatorioSeguro, tropo?: TropoId): Semente {
   const g = GENEROS[genero];
   return {
     lugar: escolher(g.lugares, rnd),
     elemento: escolher(g.elementos, rnd),
     objetivo: escolher(g.objetivos, rnd),
+    // Nos gêneros de romance, sem tropo escolhido, sorteia um.
+    tropo: g.romance ? (tropo ?? escolher(TROPOS, rnd).id) : null,
   };
 }
 
@@ -253,7 +400,12 @@ export function validarSugestao(s: unknown): SugestaoTema | null {
   if (!s || typeof s !== 'object') return null;
   const o = s as { tipo?: unknown; genero?: unknown; texto?: unknown };
   if (o.tipo === 'sortear') return { tipo: 'sortear' };
-  if (o.tipo === 'genero' && typeof o.genero === 'string' && Object.hasOwn(GENEROS, o.genero)) return { tipo: 'genero', genero: o.genero as GeneroId };
+  if (o.tipo === 'genero' && typeof o.genero === 'string' && Object.hasOwn(GENEROS, o.genero)) {
+    const genero = o.genero as GeneroId;
+    const tropo = (o as { tropo?: unknown }).tropo;
+    if (GENEROS[genero].romance && typeof tropo === 'string' && Object.hasOwn(TROPO_POR_ID, tropo)) return { tipo: 'genero', genero, tropo: tropo as TropoId };
+    return { tipo: 'genero', genero };
+  }
   if (o.tipo === 'livre' && typeof o.texto === 'string') {
     const texto = limparTemaLivre(o.texto);
     return texto ? { tipo: 'livre', texto } : null;
@@ -265,20 +417,20 @@ export function mesmaSugestao(a: SugestaoTema | null, b: SugestaoTema | null): b
   const x = a ?? { tipo: 'sortear' };
   const y = b ?? { tipo: 'sortear' };
   if (x.tipo !== y.tipo) return false;
-  if (x.tipo === 'genero' && y.tipo === 'genero') return x.genero === y.genero;
+  if (x.tipo === 'genero' && y.tipo === 'genero') return x.genero === y.genero && (x.tropo ?? null) === (y.tropo ?? null);
   if (x.tipo === 'livre' && y.tipo === 'livre') return x.texto.toLowerCase() === y.texto.toLowerCase();
   return true;
 }
 
 export function rotuloSugestao(s: SugestaoTema | null): string {
   if (!s || s.tipo === 'sortear') return '🎲 Surpresa';
-  if (s.tipo === 'genero') return `${GENEROS[s.genero].icone} ${GENEROS[s.genero].nome}`;
+  if (s.tipo === 'genero') return `${GENEROS[s.genero].icone} ${GENEROS[s.genero].nome}${s.tropo ? ` · ${TROPO_POR_ID[s.tropo].nome}` : ''}`;
   return `✍️ “${s.texto}”`;
 }
 
 /** Transforma uma sugestão (ou nenhuma) no tema da partida. */
 export function resolverTema(s: SugestaoTema | null, anterior: GeneroId | null, rnd: Aleatorio = aleatorioSeguro): TemaDefinido {
-  if (s?.tipo === 'genero') return { genero: s.genero, temaLivre: null, semente: sortearSemente(s.genero, rnd), origem: 'escolha' };
+  if (s?.tipo === 'genero') return { genero: s.genero, temaLivre: null, semente: sortearSemente(s.genero, rnd, s.tropo), origem: 'escolha' };
   if (s?.tipo === 'livre' && limparTemaLivre(s.texto)) return { genero: null, temaLivre: limparTemaLivre(s.texto), semente: null, origem: 'livre' };
   const { genero, semente } = sortearGenero(anterior, rnd);
   return { genero, temaLivre: null, semente, origem: 'sorteio' };

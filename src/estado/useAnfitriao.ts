@@ -129,7 +129,7 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
           {
             historico: historico.current,
             mensagem: pedido.mensagem,
-            contexto: { numero: pedido.numero, epilogo: pedido.epilogo, genero: estado.genero, temaLivre: estado.temaLivre, nomes, totalCapitulos: estado.totalCapitulos },
+            contexto: { numero: pedido.numero, epilogo: pedido.epilogo, genero: estado.genero, temaLivre: estado.temaLivre, adulto: estado.adulto, nomes, totalCapitulos: estado.totalCapitulos },
           },
           aoParcial,
           ctrl.signal,
@@ -167,6 +167,7 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
     (numero: number, escolha: Escolha) => despachar({ tipo: 'escolha', jogador: 'j1', numero, escolha }),
     [despachar],
   );
+  const definirAdulto = useCallback((adulto: boolean) => despachar({ tipo: 'definirAdulto', adulto }), [despachar]);
   const sugerir = useCallback((s: SugestaoTema | null) => despachar({ tipo: 'sugerir', jogador: 'j1', sugestao: s }), [despachar]);
   const iniciar = useCallback(
     (origem: IdJogador | 'sortearEntre') => {
@@ -201,6 +202,7 @@ export function useAnfitriao(op: OpcoesAnfitriao): Sessao {
     escolher,
     sugerir,
     iniciar,
+    definirAdulto,
     tentarDeNovo,
     novaPartida,
     sair,

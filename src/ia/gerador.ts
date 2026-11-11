@@ -15,6 +15,7 @@ export interface PedidoGeracao {
     /** Gênero da partida (null no tema livre, antes do capítulo 1). */
     genero: GeneroId | null;
     temaLivre: string | null;
+    adulto: boolean;
     nomes: Record<IdJogador, string>;
     totalCapitulos: number;
   };

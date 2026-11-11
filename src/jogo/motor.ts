@@ -25,6 +25,7 @@ export function criarEstadoInicial(codigo: string, nomeAnfitriao: string): Estad
     temaLivre: null,
     origemTema: null,
     sugestoes: { j1: null, j2: null },
+    adulto: false,
     semente: null,
     tituloHistoria: '',
     personagens: null,
@@ -120,6 +121,7 @@ export type Acao =
   | { tipo: 'convidadoEntrou'; nome: string }
   | { tipo: 'conexao'; jogador: IdJogador; conectado: boolean }
   | { tipo: 'sugerir'; jogador: IdJogador; sugestao: SugestaoTema | null }
+  | { tipo: 'definirAdulto'; adulto: boolean }
   | { tipo: 'iniciar'; tema: TemaDefinido; idPartida: number }
   | { tipo: 'geracaoIniciada' }
   | { tipo: 'parcial'; parcial: TextoParcial }
@@ -145,6 +147,8 @@ export function motor(e: EstadoJogo, a: Acao): EstadoJogo {
       const sugestao = a.sugestao ? validarSugestao(a.sugestao) : null;
       return { ...e, sugestoes: { ...e.sugestoes, [a.jogador]: sugestao } };
     }
+    case 'definirAdulto':
+      return e.fase === 'lobby' ? { ...e, adulto: a.adulto } : e;
     case 'iniciar': {
       if (e.fase !== 'lobby' || !e.jogadores.j2) return e;
       const t = a.tema;
@@ -213,6 +217,7 @@ export function motor(e: EstadoJogo, a: Acao): EstadoJogo {
       return {
         ...criarEstadoInicial(e.codigo, e.jogadores.j1?.nome ?? ''),
         jogadores: e.jogadores,
+        adulto: e.adulto,
         generoAnterior: e.genero ?? e.generoAnterior,
       };
   }

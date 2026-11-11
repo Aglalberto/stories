@@ -151,6 +151,16 @@ describe('tema', () => {
     expect(motor(jogando, { tipo: 'sugerir', jogador: 'j1', sugestao: null })).toBe(jogando);
   });
 
+  it('modo 18+ só muda na sala de espera e continua na nova partida', () => {
+    let e = criarEstadoInicial('ABCDE', 'Ana');
+    e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
+    e = motor(e, { tipo: 'definirAdulto', adulto: true });
+    expect(e.adulto).toBe(true);
+    e = motor(e, { tipo: 'iniciar', tema: { genero: 'comedia', temaLivre: null, semente: null, origem: 'escolha' }, idPartida: 1 });
+    expect(motor(e, { tipo: 'definirAdulto', adulto: false }).adulto).toBe(true);
+    expect(motor(e, { tipo: 'novaPartida' }).adulto).toBe(true);
+  });
+
   it('no tema livre o gênero visual vem da IA no capítulo 1', () => {
     let e = criarEstadoInicial('ABCDE', 'Ana');
     e = motor(e, { tipo: 'convidadoEntrou', nome: 'Beto' });
